@@ -76,6 +76,9 @@ public class Tank {
     public void KeyPressed(KeyEvent e) {
         int key = e.getKeyCode();
         switch (key) {
+            case KeyEvent.VK_CONTROL:
+                fire();
+                break;
             case KeyEvent.VK_LEFT:
                 BL = true;
                 break;
@@ -109,6 +112,8 @@ public class Tank {
                 BD = false;
                 break;
         }
+
+        locateDirection();
     }
 
     // 每一次按键后，对当前方向进行调整
@@ -122,5 +127,11 @@ public class Tank {
         else if (!BL && !BU && !BR && BD) dir = Direction.D;
         else if (BL && !BU && !BR && BD) dir = Direction.LD;
         else if (!BL && !BU && !BR && !BD) dir = Direction.STOP;
+    }
+
+    // 该方法用于发射子弹
+    public Missile fire() {
+        Missile m = new Missile(x, y, dir);
+        return m;
     }
 }

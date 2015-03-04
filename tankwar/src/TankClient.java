@@ -12,6 +12,7 @@ public class TankClient extends Frame {
     //int x = 50, y = 50;
 
     Tank t = new Tank(50,50);
+    Missile m = null;
 
     Image offScreenImage = null;
 
@@ -28,7 +29,7 @@ public class TankClient extends Frame {
             }
         });
 
-        this.setBackground(Color.green);
+        this.setBackground(Color.GREEN);
         this.setResizable(false);
 
         this.addKeyListener(new KeyMonitor());
@@ -39,6 +40,7 @@ public class TankClient extends Frame {
     @Override
     public void paint(Graphics g) {
         t.draw(g);
+        if (m != null) m.draw(g);
     }
 
     // 重写update方法，使用双缓冲解决屏幕闪动问题
