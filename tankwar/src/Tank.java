@@ -6,6 +6,26 @@ import java.awt.event.KeyEvent;
  */
 public class Tank {
     private int x ,y;
+    public TankClient tc;
+
+    private boolean live = true;
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
+    }
+
+    private boolean good;
+
+    public static final int WIDTH = 30;
+    public static final int HEIGHT = 30;
+
+    // 添加炮筒属性，初始化时给予一个方向，类型为Direction
+    public Direction ptDir = Direction.U;
+
     private static final int XSPEED = 5;
     private static final int YSPEED = 5;
 
@@ -21,22 +41,59 @@ public class Tank {
     // 坦克初始化的状态
     private Direction dir = Direction.STOP;
 
-    public Tank(int x, int y) {
+    public Tank(int x, int y, boolean good) {
         this.x = x;
         this.y = y;
+        this.good = good;
+    }
+
+    public Tank(int x, int y, boolean good, TankClient tc) {
+        this(x,y,good);
+        this.tc = tc;
     }
 
     // 坦克类中自定义画笔
     public void draw(Graphics g) {
+        if (!live) return;
         Color c = g.getColor();
-        g.setColor(Color.red);
-        g.fillOval(x, y, 30, 30);
+        if (good) g.setColor(Color.GREEN);
+        else g.setColor(Color.BLUE);
+        g.fillOval(x, y, WIDTH, HEIGHT);
         g.setColor(c);
+
+        // 根据炮筒的位置，画出炮筒
+        switch (ptDir) {
+            case L:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x, y + this.HEIGHT/2);
+                break;
+            case LU:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x, y);
+                break;
+            case U:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH/2, y);
+                break;
+            case RU:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH, y);
+                break;
+            case R:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH, y + this.HEIGHT/2);
+                break;
+            case RD:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH, y + this.HEIGHT);
+                break;
+            case D:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH/2, y + this.HEIGHT);
+                break;
+            case LD:
+                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x, y + this.HEIGHT);
+                break;
+        }
 
         // 每一次draw坦克类时，根据方向进行移动
         move();
     }
 
+    // move方法表示坦克的移动及炮筒的方向
     public void move() {
         switch (dir) {
             case L:
@@ -70,15 +127,22 @@ public class Tank {
             case STOP:
                 break;
         }
+
+        if (this.dir != Direction.STOP) {
+            this.ptDir = this.dir;
+        }
+
+        // 判断坦克是否出界
+        if (x < 0) x = 0;
+        if (y < 30) y = 30;
+        if (x + Tank.WIDTH > TankClient.GAME_WIDTH) x = TankClient.GAME_WIDTH - Tank.WIDTH;
+        if (y + Tank.HEIGHT > TankClient.GAME_HEIGHT) y = TankClient.GAME_HEIGHT - Tank.HEIGHT;
     }
 
     // 坦克类自定义按键移动
     public void KeyPressed(KeyEvent e) {
         int key = e.getKeyCode();
         switch (key) {
-            case KeyEvent.VK_CONTROL:
-                fire();
-                break;
             case KeyEvent.VK_LEFT:
                 BL = true;
                 break;
@@ -99,6 +163,9 @@ public class Tank {
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
         switch (key) {
+            case KeyEvent.VK_CONTROL:
+                tc.missiles.add(fire());
+                break;
             case KeyEvent.VK_LEFT:
                 BL = false;
                 break;
@@ -131,7 +198,15 @@ public class Tank {
 
     // 该方法用于发射子弹
     public Missile fire() {
-        Missile m = new Missile(x, y, dir);
+        int x = this.x + Tank.WIDTH/2 - Missile.WIDTH/2;
+        int y = this.y + Tank.HEIGHT/2 - Missile.HEIGHT/2;
+        // 根据炮筒的方向发射子弹
+        Missile m = new Missile(x, y, ptDir,this.tc);
         return m;
+    }
+
+    // 该函数用于返回包含坦克的矩形实例，用于与子弹进行碰撞检测
+    public Rectangle getRect() {
+        return new Rectangle(x, y, WIDTH, HEIGHT);
     }
 }
