@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.List;
 
 public class Missile {
     int x ,y;
@@ -13,6 +14,9 @@ public class Missile {
     private boolean Live = true;
     public TankClient tc;
 
+    // 标记子弹的好坏，同一方的人不能相互攻击
+    private boolean good;
+
     public void setLive(boolean live) {
         Live = live;
     }
@@ -23,8 +27,9 @@ public class Missile {
         this.dir = dir;
     }
 
-    public Missile(int x, int y, Tank.Direction dir, TankClient tc) {
+    public Missile(int x, int y, boolean good, Tank.Direction dir, TankClient tc) {
         this(x,y,dir);
+        this.good =good;
         this.tc = tc;
     }
 
@@ -34,7 +39,7 @@ public class Missile {
             return;
         }
         Color c = g.getColor();
-        g.setColor(Color.BLACK);
+        g.setColor(Color.GRAY);
         g.fillOval(x, y, WIDTH, HEIGHT);
         g.setColor(c);
 
@@ -85,12 +90,38 @@ public class Missile {
 
     // 子弹打击坦克
     public boolean hitTank(Tank t) {
-        if (this.getRect().intersects(t.getRect()) && t.isLive()) {
+        if (this.Live && this.getRect().intersects(t.getRect()) && t.isLive() && this.good != t.isGood()) {
+            // 如果击中的为我方坦克，则生命值减少，否则直接消灭
+            if (t.isGood()) {
+                t.setLife(t.getLife()-20);
+                if (t.getLife() <= 0) {
+                    t.setLive(false);
+                }
+            }else {
+                t.setLive(false);
+            }
             // 打中坦克后，产生爆炸效果
             Explode e = new Explode(x, y, tc);
             tc.explodes.add(e);
+            this.Live = false;
+            return true;
+        }
+        return false;
+    }
 
-            t.setLive(false);
+    // 该函数用于判断打击一群坦克
+    public boolean hitTanks(List<Tank> enmeyTank) {
+        for (int i=0; i<enmeyTank.size(); i++) {
+            if (hitTank(enmeyTank.get(i))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 子弹打击墙壁的判断函数
+    public boolean hitWall(Wall w) {
+        if (this.Live && this.getRect().intersects(w.getRect())) {
             this.Live = false;
             return true;
         }

@@ -12,22 +12,36 @@ public class TankClient extends Frame {
 
     public static final int GAME_WIDTH = 800;
     public static final int GAME_HEIGHT = 600;
-    //int x = 50, y = 50;
 
-    Tank t = new Tank(50, 50, true, this);
+    Tank t = new Tank(50, 50, true, Tank.Direction.STOP, this);
 
-    // 初始化一个敌方坦克
-    Tank enmeyTank = new Tank(100, 100, false, this);
+    // 初始化敌方坦克，用List容器填装
+    //Tank enmeyTank = new Tank(100, 100, false, this);
+    List<Tank> enmeyTanks = new ArrayList<>();
 
     // 用List容器存放多枚炮弹
     List<Missile> missiles = new ArrayList<>();
     // 用List存放爆炸对象
     List<Explode> explodes = new ArrayList<>();
 
+    // 生成墙的对象
+    Wall w1 = new Wall(110, 150, 20, 180);
+    Wall w2 = new Wall(280, 150, 280, 20);
 
+    // 生成血块
+    Blood b = new Blood();
+
+    // 加入双缓冲
     Image offScreenImage = null;
 
     public void launchFrame() {
+
+        for (int i=0; i<10; i++) {
+            // 初始化敌军坦克
+            Tank tank = new Tank(100 + 40*(i+1), 50, false, Tank.Direction.D, this);
+            this.enmeyTanks.add(tank);
+        }
+
         this.setLocation(300, 200);
         this.setSize(GAME_WIDTH, GAME_HEIGHT);
         this.setTitle("TankWar");
@@ -40,7 +54,7 @@ public class TankClient extends Frame {
             }
         });
 
-        this.setBackground(Color.magenta);
+        //this.setBackground(Color.BLACK);
         this.setResizable(false);
 
         this.addKeyListener(new KeyMonitor());
@@ -50,15 +64,24 @@ public class TankClient extends Frame {
 
     @Override
     public void paint(Graphics g) {
+        Color c = g.getColor();
+        g.setColor(Color.WHITE);
         g.drawString("missiles count :" + missiles.size(), 10, 50);
         g.drawString("explodes count :" + explodes.size(), 10, 70);
+        g.drawString("enmeytanks count :" + enmeyTanks.size(), 10, 90);
+        g.drawString("mytank life is  :" + t.getLife(), 10, 110);
+        g.setColor(c);
+
         // 通过循环来画出多枚炮弹
         //for (Missile m : missiles) {
         //    m.draw(g);
         //}
         for (int i=0; i<missiles.size(); i++) {
             Missile m = missiles.get(i);
-            m.hitTank(enmeyTank);
+            m.hitTanks(enmeyTanks);
+            m.hitTank(t);
+            m.hitWall(w1);
+            m.hitWall(w2);
             m.draw(g);
         }
 
@@ -67,8 +90,19 @@ public class TankClient extends Frame {
             e.draw(g);
         }
 
+        for (int i=0; i<enmeyTanks.size(); i++) {
+            Tank tank = enmeyTanks.get(i);
+            tank.collidesWithWall(w1);
+            tank.collidesWithWall(w2);
+            tank.collidesWithTank(enmeyTanks);
+            tank.draw(g);
+        }
+
         t.draw(g);
-        enmeyTank.draw(g);
+        w1.draw(g);
+        w2.draw(g);
+        b.draw(g);
+        t.eatBloodBar(b);
     }
 
     // 重写update方法，使用双缓冲解决屏幕闪动问题
@@ -79,7 +113,7 @@ public class TankClient extends Frame {
         }
         Graphics offScreenPaint = offScreenImage.getGraphics();
         Color c = offScreenPaint.getColor();
-        offScreenPaint.setColor(Color.magenta);
+        offScreenPaint.setColor(Color.BLACK);
         offScreenPaint.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         offScreenPaint.setColor(c);
         paint(offScreenPaint);
