@@ -13,7 +13,7 @@ public class TankClient extends Frame {
     public static final int GAME_WIDTH = 800;
     public static final int GAME_HEIGHT = 600;
 
-    Tank t = new Tank(50, 50, true, Tank.Direction.STOP, this);
+    Tank t = new Tank(50, 50, true, Direction.STOP, this);
 
     // 初始化敌方坦克，用List容器填装
     //Tank enmeyTank = new Tank(100, 100, false, this);
@@ -38,7 +38,7 @@ public class TankClient extends Frame {
 
         for (int i=0; i<10; i++) {
             // 初始化敌军坦克
-            Tank tank = new Tank(100 + 40*(i+1), 50, false, Tank.Direction.D, this);
+            Tank tank = new Tank(100 + 40*(i+1), 50, false, Direction.D, this);
             this.enmeyTanks.add(tank);
         }
 
@@ -71,6 +71,14 @@ public class TankClient extends Frame {
         g.drawString("enmeytanks count :" + enmeyTanks.size(), 10, 90);
         g.drawString("mytank life is  :" + t.getLife(), 10, 110);
         g.setColor(c);
+
+        // 当敌军坦克全部消失后，自动生成新的坦克，以便游戏继续
+        if (enmeyTanks.size() <= 0) {
+            for (int i=0; i<5; i++) {
+                Tank tank = new Tank(100 + 40*(i+1), 50, false, Direction.D, this);
+                this.enmeyTanks.add(tank);
+            }
+        }
 
         // 通过循环来画出多枚炮弹
         //for (Missile m : missiles) {

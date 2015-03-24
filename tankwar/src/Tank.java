@@ -1,7 +1,8 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
-
 
 /**
  * 定义一个坦克类，该类包含属于自己的成员变量及实现方法，采用面向对象的设计思想
@@ -61,10 +62,35 @@ public class Tank {
     // 定义上下左右方向，用于键盘按下后，标示当前的方向
     private boolean BL=false, BU=false, BR=false, BD=false;
 
-    // 定义一个枚举类型，用于设置方向
-    enum Direction {
-        L, LU, U, RU, R, RD, D, LD, STOP
+
+    private static Image[] tankImages = null;
+    private static Toolkit tk = Toolkit.getDefaultToolkit();
+    private static Map<String,Image> tank = new HashMap<>();
+
+    // 静态代码块，在类被加载到内存中时执行
+    static {
+        tankImages = new Image[] {
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankD.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankL.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankLD.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankLU.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankR.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankRD.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankRU.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankU.gif")),
+        };
+        
+        tank.put("D", tankImages[0]);
+        tank.put("L", tankImages[1]);
+        tank.put("LD", tankImages[2]);
+        tank.put("LU", tankImages[3]);
+        tank.put("R", tankImages[4]);
+        tank.put("RD", tankImages[5]);
+        tank.put("RU", tankImages[6]);
+        tank.put("U", tankImages[7]);
+        
     }
+
     // 坦克初始化的状态
     private Direction dir = Direction.STOP;
 
@@ -88,7 +114,7 @@ public class Tank {
             g.setColor(Color.BLACK);
             g.drawRect(x, y-15, WIDTH, 10);
             g.setColor(Color.RED);
-            g.fillRect(x, y-15, WIDTH*life/100, 10);
+            g.fillRect(x, y-15, WIDTH * life/100, 10);
             g.setColor(c);
         }
     }
@@ -104,38 +130,38 @@ public class Tank {
 
         if (this.isGood()) bb.draw(g);
 
-        Color c = g.getColor();
+       /* Color c = g.getColor();
         if (good) g.setColor(Color.GREEN);
         else g.setColor(Color.BLUE);
 
         g.fillOval(x, y, WIDTH, HEIGHT);
-        g.setColor(c);
+        g.setColor(c);*/
 
         // 根据炮筒的位置，画出炮筒
         switch (ptDir) {
             case L:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x, y + this.HEIGHT/2);
+                g.drawImage(tank.get("L"), x, y, null);
                 break;
             case LU:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x, y);
+            	g.drawImage(tank.get("LU"), x, y, null);
                 break;
             case U:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH/2, y);
+            	g.drawImage(tank.get("U"), x, y, null);
                 break;
             case RU:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH, y);
+            	g.drawImage(tank.get("RU"), x, y, null);
                 break;
             case R:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH, y + this.HEIGHT/2);
+            	g.drawImage(tank.get("R"), x, y, null);
                 break;
             case RD:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH, y + this.HEIGHT);
+            	g.drawImage(tank.get("RD"), x, y, null);
                 break;
             case D:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x + this.WIDTH/2, y + this.HEIGHT);
+            	g.drawImage(tank.get("D"), x, y, null);
                 break;
             case LD:
-                g.drawLine(x + this.WIDTH/2, y + this.HEIGHT/2, x, y + this.HEIGHT);
+            	g.drawImage(tank.get("LD"), x, y, null);
                 break;
         }
 
@@ -287,7 +313,7 @@ public class Tank {
 
     // 该函数用于返回包含坦克的矩形实例，用于与子弹进行碰撞检测
     public Rectangle getRect() {
-        return new Rectangle(x, y, WIDTH, HEIGHT);
+        return new Rectangle(x, y, tankImages[0].getWidth(null), tankImages[0].getHeight(null));
     }
 
     public void backToLocation() {

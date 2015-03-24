@@ -1,11 +1,13 @@
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Missile {
     int x ,y;
     private static final int XSPEED = 8;
     private static final int YSPEED = 8;
-    Tank.Direction dir;
+    Direction dir;
 
     public static final int WIDTH = 10;
     public static final int HEIGHT = 10;
@@ -16,18 +18,44 @@ public class Missile {
 
     // 标记子弹的好坏，同一方的人不能相互攻击
     private boolean good;
+    
+    private static Image[] missileImages = null;
+    private static Toolkit tk = Toolkit.getDefaultToolkit();
+    private static Map<String, Image> missile = new HashMap<>();
+    
+    static {
+    	missileImages = new Image[] {
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankD.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankL.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankLD.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankLU.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankR.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankRD.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankRU.gif")),
+            tk.getImage(Tank.class.getClassLoader().getResource("images/tankU.gif")),
+        };
+    	
+    	missile.put("D", missileImages[0]);
+    	missile.put("L", missileImages[1]);
+    	missile.put("LD",missileImages[2]);
+        missile.put("LU",missileImages[3]);
+        missile.put("R", missileImages[4]);
+        missile.put("RD",missileImages[5]);
+        missile.put("RU",missileImages[6]);
+        missile.put("U", missileImages[7]);
+    }
 
     public void setLive(boolean live) {
         Live = live;
     }
 
-    public Missile(int x, int y, Tank.Direction dir) {
+    public Missile(int x, int y, Direction dir) {
         this.x = x;
         this.y = y;
         this.dir = dir;
     }
 
-    public Missile(int x, int y, boolean good, Tank.Direction dir, TankClient tc) {
+    public Missile(int x, int y, boolean good, Direction dir, TankClient tc) {
         this(x,y,dir);
         this.good =good;
         this.tc = tc;
@@ -38,10 +66,13 @@ public class Missile {
             tc.missiles.remove(this);
             return;
         }
+        
         Color c = g.getColor();
         g.setColor(Color.GRAY);
         g.fillOval(x, y, WIDTH, HEIGHT);
         g.setColor(c);
+        
+        
 
         move();
     }
